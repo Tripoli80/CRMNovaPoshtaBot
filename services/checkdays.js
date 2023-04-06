@@ -9,6 +9,7 @@ const patternActualDeliveryDate = "yyyy-MM-dd HH:mm:ss";
 const checkDays = async (req, res) => {
   try {
     let { ttn, limitday = 3, dealId, responsible = " - " } = req.query;
+    console.log("🚀 ~ file: checkdays.js:12 ~ ttn:", ttn, responsible, dealId);
     if (isNaN(limitday)) limitday = 3;
     if (!ttn)
       return res.status(400).json({ message: "Отсутствует трекинг-номер" });
