@@ -9,7 +9,6 @@ const patternActualDeliveryDate = "yyyy-MM-dd HH:mm:ss";
 const checkDays = async (req, res) => {
   try {
     let { ttn, limitday = 3, dealId, responsible = " - " } = req.query;
-    console.log("🚀 ~ file: checkdays.js:12 ~ ttn:", ttn, responsible, dealId);
     if (isNaN(limitday)) limitday = 3;
     if (!ttn)
       return res.status(400).json({ message: "Отсутствует трекинг-номер" });
@@ -19,24 +18,45 @@ const checkDays = async (req, res) => {
       return res.status(404).json({ message: "Посылка не найдена" });
 
     const { StatusCode, DateCreated, ActualDeliveryDate } = trackingData;
-    const isArrived = StatusCode === "7";
-    const isFinish =
-      StatusCode === "9" || StatusCode === "10" || StatusCode === "11";
-    if (isFinish) {
-      const isUpdated = await updateDealStage({ dealId, newStageId });
-      if (isUpdated)
-        return res.status(200).json({
-          message: "deal win",
-        });
-      return res.status(200).json({
-        message: "deal win but not updated in CRM",
-      });
+
+    let status = 0;
+    switch (StatusCode) {
+      case "103":
+      case "102":
+      case "111":
+        status = 400;
+        break;
+      case "7":
+        status = 300;
+        break;
+      case "9" || "10" || "11":
+        status = 200;
+        break;
     }
+
+    // const isArrived = StatusCode === "7";
+    // const isBrake = StatusCode === "103" || StatusCode === "102";
+    // const isFinish =
+    //   StatusCode === "9" || StatusCode === "10" || StatusCode === "11";
+
+    if (status === 200) {
+      const isUpdated = await updateDealStage({ dealId, newStageId });
+      let message = "deal win but not updated in CRM";
+      if (isUpdated) message = "deal win";
+      return res.status(200).json({ message });
+    }
+
+    if (status === 400) {
+      const messageText = `Отказ от посылки ${trackingNumber}. ${responsible}`;
+      await sendMassage({ messageText, dealId });
+      return res.status(200).json({ messageText });
+    }
+
     const currentDate = new Date();
     const createdDate = parse(DateCreated, patternDateNP, new Date());
     // const daysSinceSent = differenceInDays(currentDate, createdDate);
 
-    if (!isArrived) {
+    if (status !== 300) {
       return res.status(200).json({
         message: "Not Arrived",
       });
@@ -53,6 +73,7 @@ const checkDays = async (req, res) => {
     if (+daysInWarehouse >= +limitday) {
       const messageText = `Посылка ${trackingNumber} на складе уже ${daysInWarehouse} дней. ${responsible}`;
       await sendMassage({ messageText, dealId });
+      9 - 6;
     }
 
     res.status(200).json({

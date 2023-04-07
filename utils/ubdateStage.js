@@ -14,14 +14,15 @@ async function updateDealStage({ dealId, newStageId }) {
     });
 
     if (response.data.result) {
-        console.log("Сделка успешно обновлена");
-        return true;
+      console.log("Сделка успешно обновлена");
+      return true;
     } else {
       console.error("Не удалось обновить сделку");
       return false;
     }
   } catch (error) {
-    console.error("Произошла ошибка при обновлении сделки");
+    console.log("🚀ubdateStage.js", error);
+    // console.error("Произошла ошибка при обновлении сделки");
   }
 }
 
