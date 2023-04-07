@@ -29,7 +29,9 @@ const checkDays = async (req, res) => {
       case "7":
         status = 300;
         break;
-      case "9" || "10" || "11":
+      case "9":
+      case "11":
+      case "10":
         status = 200;
         break;
     }
@@ -73,7 +75,6 @@ const checkDays = async (req, res) => {
     if (+daysInWarehouse >= +limitday) {
       const messageText = `Посылка ${trackingNumber} на складе уже ${daysInWarehouse} дней. ${responsible}`;
       await sendMassage({ messageText, dealId });
-     
     }
 
     res.status(200).json({
