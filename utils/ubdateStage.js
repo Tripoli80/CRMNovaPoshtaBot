@@ -26,4 +26,25 @@ async function updateDealStage({ dealId, newStageId }) {
   }
 }
 
-module.exports = { updateDealStage };
+async function updateDealDays({ dealId, daysInWarehouse }) {
+  try {
+    const response = await axios.post(`${webhookUrl}/crm.deal.update`, {
+      id: dealId,
+      fields: {
+        UF_CRM_1680872708: +daysInWarehouse,
+      },
+    });
+
+    if (response.data.result) {
+      console.log("Сделка успешно обновлена");
+      return true;
+    } else {
+      console.error("Не удалось обновить сделку");
+      return false;
+    }
+  } catch (error) {
+    console.log("ubdateStage.js", error);
+    // console.error("Произошла ошибка при обновлении сделки");
+  }
+}
+module.exports = { updateDealStage, updateDealDays };

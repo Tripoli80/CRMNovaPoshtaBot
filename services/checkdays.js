@@ -1,7 +1,7 @@
 const { parse, differenceInDays } = require("date-fns");
 const { getTrackingData } = require("../utils/apiNP");
 const { sendMassage } = require("../utils/telegramApi");
-const { updateDealStage } = require("../utils/ubdateStage");
+const { updateDealStage, updateDealDays } = require("../utils/ubdateStage");
 const newStageId = "C1:WON";
 const patternDateNP = "dd-MM-yyyy HH:mm:ss";
 const patternActualDeliveryDate = "yyyy-MM-dd HH:mm:ss";
@@ -69,11 +69,11 @@ const checkDays = async (req, res) => {
     );
 
     const daysInWarehouse = differenceInDays(currentDate, warehouseArrivalDate);
-
+    await updateDealDays({ dealId, daysInWarehouse });
     if (+daysInWarehouse >= +limitday) {
       const messageText = `Посылка ${trackingNumber} на складе уже ${daysInWarehouse} дней. ${responsible}`;
       await sendMassage({ messageText, dealId });
-      9 - 6;
+     
     }
 
     res.status(200).json({
