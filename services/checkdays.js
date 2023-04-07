@@ -1,7 +1,11 @@
 const { parse, differenceInDays } = require("date-fns");
 const { getTrackingData } = require("../utils/apiNP");
 const { sendMassage } = require("../utils/telegramApi");
-const { updateDealStage, updateDealDays } = require("../utils/ubdateStage");
+const {
+  updateDealStage,
+  updateDealDays,
+  updateDealFields,
+} = require("../utils/ubdateStage");
 const newStageId = "C1:WON";
 const patternDateNP = "dd-MM-yyyy HH:mm:ss";
 const patternActualDeliveryDate = "yyyy-MM-dd HH:mm:ss";
@@ -17,8 +21,15 @@ const checkDays = async (req, res) => {
     if (!trackingData)
       return res.status(404).json({ message: "Посылка не найдена" });
 
-    const { StatusCode, DateCreated, ActualDeliveryDate } = trackingData;
+    const { StatusCode, DateCreated, ActualDeliveryDate, Status } =
+      trackingData;
 
+    await updateDealFields({
+      dealId,
+      fields: {
+        UF_CRM_1680877332354: Status,
+      },
+    });
     let status = 0;
     switch (StatusCode) {
       case "103":
